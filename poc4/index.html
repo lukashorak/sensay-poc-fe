@@ -1,0 +1,25 @@
+<html>
+<head>
+	<script src="https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@latest/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js"></script>
+	<script src="index.js"></script>
+</head>
+<body onload="intialize()">
+<h1>Sensay - Call Students</h1>
+<div>
+<label for="number">Student Number:</label>
+<input id="number" value="+886970118185">
+</div>
+
+<div>
+<label for="message">Message:</label>
+<textarea id="message" style="width:550px; height:100px;">Good morning Lukas, please try Sensay!</textarea>
+</div>
+
+<div>
+<button id="callButton" onclick="callTwilio()">Call</button>
+</div>
+
+
+<pre id="resultPre"></pre>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<html>
+<head>
+	<script src="https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@latest/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js"></script>
+	<script src="index.js"></script>
+</head>
+<body onload="intialize()">
+<h1>KUDO - AI - Voice to spaCy </h1>
+<button id="recordButton" onclick="record()">Record</button>
+<button id="stopButton" onclick="stop()" disabled>STOP</button>
+<h2>Recording</h2>
+<pre id="resultPre"></pre>
+<h2>Spacy</h2>
+<pre id="spacyPre"></pre>
+<div id="divEnt"></div>
+</body>
+</html>

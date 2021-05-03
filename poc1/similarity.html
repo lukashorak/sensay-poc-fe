@@ -1,0 +1,28 @@
+<html>
+<head>
+	<script src="similarity.js"></script>
+<style>
+
+.good {
+	color: #06d6a0;
+}
+
+.bad {
+	color: #ef476f;
+}
+</style>
+</head>
+<body onload="intialize()">
+<h1>Document similarity</h1>
+<button id="evaluateButton" onclick="evaluateSimilarity()">Evaluate</button>
+<p>Expected answer</p>
+<textarea id="textAreaExpected" style="width:550px; height:100px;"></textarea>
+<p>Text to use for evaluation</p>
+<textarea id="textAreaInput" style="width:550px; height:100px;"></textarea>
+<h2>API</h2>
+<p>Evaluated result:</p>
+<h3 id="localResult"></h3>
+<h3 id="apiResult"></h3>
+<pre id="apiPre">Nothing yet</pre>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<html>
+<head>
+	<script src="matching.js"></script>
+<style>
+.good {
+	color: #06d6a0;
+}
+
+.bad {
+	color: #ef476f;
+}
+</style>
+</head>
+<body onload="intialize()">
+<h1>Word matching</h1>
+<button id="evaluateButton" onclick="evaluateMatch()">Evaluate</button>
+<p>Insert required keywords (one per line, alternative on the same line separated by space)</p>
+<textarea id="textAreaKeywords" style="width:250px; height:200px;"></textarea>
+<p>Text to use for evaluation</p>
+<textarea id="textAreaInput" style="width:550px; height:100px;"></textarea>
+<h2>API</h2>
+<p>Evaluated result:</p>
+<h3 id="apiResult"></h3>
+<pre id="apiPre">Nothing yet</pre>
+</body>
+</html>
