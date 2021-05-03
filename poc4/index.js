@@ -78,7 +78,7 @@ function callTwilio(){
 			)
 				.then((data) => {
 					console.log("send data to api", data);
-					document.getElementById("spacyPre").innerHTML = "SPACY:"+JSON.stringify(data);
+					document.getElementById("resultPre").innerHTML = "Twilio:"+JSON.stringify(data);
 				})
 				.catch((error) => {
 					console.log("error sending data to api", error);
