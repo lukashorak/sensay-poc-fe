@@ -1,3 +1,4 @@
+<svelte:options accessors/>
 <script>
   import { createEventDispatcher, onMount } from "svelte";
 
@@ -6,6 +7,8 @@
   let recordings = [];
   let recordAudio = [];
   let recordCount = 0;
+
+  export let audioControlDuration;
 
   const workerOptions = {
     OggOpusEncoderWasmPath:
@@ -122,7 +125,7 @@
   <div>remainingTime:{countDownTimerText}</div>
   <div>lastRecording:{JSON.stringify($lastRecording)}</div>
   {#if $lastRecording}
-    <audio controls="controls">
+    <audio controls="controls" bind:duration={audioControlDuration}>
       <track kind="captions" />
       <source src={$lastRecording.url} type="audio/wav" />
     </audio>

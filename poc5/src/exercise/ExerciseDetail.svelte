@@ -28,13 +28,13 @@
   let recognitionResults = [];
   let recognitionResultsFinal = writable([]);
 
-  const unsubscribe = recognitionResultsFinal.subscribe((value) => {
-    formatResult(value);
-  });
+  let speechToTextOpus = undefined;
 
   let recognizer;
 
-  let speechToTextOpus;
+  const unsubscribe = recognitionResultsFinal.subscribe((value) => {
+    formatResult(value);
+  });
 
   onMount(async () => {
     console.log("loginDetail", loginDetail, exercisePin);
@@ -132,7 +132,10 @@
   }
 
   function formatResult(r) {
-    const average = (arr) => arr.reduce((p, c) => p + c, 0) / arr.length;
+    const sum = (arr) => arr.reduce((p, c) => p + c, 0);  
+    const average = (arr) => arr.reduce((p, c) => p + c, 0) / arr.length;    
+    
+     
 
     parts = r.flatMap((part) => {
       if (part?.NBest.length > 0) {
@@ -176,8 +179,12 @@
     });
 
     // console.log("parts", JSON.stringify(parts));
+    
 
     aggregateScore = {
+      start: Math.min(...parts.flatMap((e) => (e?.offset))),
+      end: Math.max(...parts.flatMap((e) => (e?.offset + e?.duration))),
+      
       confidence: average(
         parts.flatMap((e) => (e?.confidence ? e?.confidence : []))
       ).toFixed(2),
@@ -194,6 +201,11 @@
         parts.flatMap((e) => (e?.pronScore ? e?.pronScore : []))
       ).toFixed(0),
     };
+
+    aggregateScore.duration = ((aggregateScore?.end - aggregateScore?.start) /10000000).toFixed(2);
+    aggregateScore.wordDurationSum = (sum(parts.flatMap((e) => e.words).map((w) => w.Duration)) /10000000).toFixed(2);
+
+    aggregateScore.audioDuration = speechToTextOpus?.audioControlDuration;
 
     console.log("aggregateScore", JSON.stringify(aggregateScore));
   }
