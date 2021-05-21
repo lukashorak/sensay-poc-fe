@@ -1,14 +1,13 @@
-<svelte:options accessors/>
 <script>
   import { createEventDispatcher, onMount } from "svelte";
-
+  import { writable } from "svelte/store";
   import { lastRecording } from "../../utilities/DataStore";
 
   let recordings = [];
   let recordAudio = [];
   let recordCount = 0;
 
-  export let audioControlDuration;
+  export let audioControlDuration = writable([]);;
 
   const workerOptions = {
     OggOpusEncoderWasmPath:
@@ -28,14 +27,22 @@
   let lastBlob;
   let lastAudio;
 
-  const time = 90;
+  const time = 60;
   let remainingTime = time;
   let countDownTimerObject;
-  let countDownTimerText = "0:90";
+  let countDownTimerText = "0:60";
 
   let recordingButtonState = "starting";
 
   const dispatch = createEventDispatcher();
+
+  onMount(async () => {
+    audioControlDuration.subscribe((value) => {
+    console.log('audioControlDuration', $audioControlDuration, value);
+        
+      dispatch('audioControlDuration', {audioControlDuration: value});
+    });
+  });
 
   function clickRecordAudio() {
     console.log("clickRecordAudio", recordAudio);
@@ -122,10 +129,10 @@
 </script>
 
 <div>
-  <div>remainingTime:{countDownTimerText}</div>
+  <div>remainingTime:<h2>{countDownTimerText}</h2></div>
   <div>lastRecording:{JSON.stringify($lastRecording)}</div>
   {#if $lastRecording}
-    <audio controls="controls" bind:duration={audioControlDuration}>
+    <audio controls="controls" bind:duration={$audioControlDuration}>
       <track kind="captions" />
       <source src={$lastRecording.url} type="audio/wav" />
     </audio>

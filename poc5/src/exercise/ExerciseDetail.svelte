@@ -29,12 +29,9 @@
   let recognitionResultsFinal = writable([]);
 
   let speechToTextOpus = undefined;
-
+  
+  let audioControlDuration = writable(undefined);
   let recognizer;
-
-  const unsubscribe = recognitionResultsFinal.subscribe((value) => {
-    formatResult(value);
-  });
 
   onMount(async () => {
     console.log("loginDetail", loginDetail, exercisePin);
@@ -48,6 +45,10 @@
       ttsButtonState = "error";
       console.log("error with SpeechSDK");
     }
+
+    const unsubscribe = recognitionResultsFinal.subscribe((value) => {
+      formatResult(value);
+    });
   });
 
   function initPlayPage() {
@@ -121,6 +122,7 @@
     ttsButtonState = "stop";
     recognitionResults.push("STOP");
     recognitionResults = recognitionResults;
+    formatResult($recognitionResultsFinal);
     speechToTextOpus.stopRecording();
     //console.log("finalResult", JSON.stringify(recognitionResults));
     recognizer.stopContinuousRecognitionAsync();
@@ -132,10 +134,8 @@
   }
 
   function formatResult(r) {
-    const sum = (arr) => arr.reduce((p, c) => p + c, 0);  
-    const average = (arr) => arr.reduce((p, c) => p + c, 0) / arr.length;    
-    
-     
+    const sum = (arr) => arr.reduce((p, c) => p + c, 0);
+    const average = (arr) => arr.reduce((p, c) => p + c, 0) / arr.length;
 
     parts = r.flatMap((part) => {
       if (part?.NBest.length > 0) {
@@ -179,12 +179,11 @@
     });
 
     // console.log("parts", JSON.stringify(parts));
-    
 
     aggregateScore = {
-      start: Math.min(...parts.flatMap((e) => (e?.offset))),
-      end: Math.max(...parts.flatMap((e) => (e?.offset + e?.duration))),
-      
+      start: Math.min(...parts.flatMap((e) => e?.offset)),
+      end: Math.max(...parts.flatMap((e) => e?.offset + e?.duration)),
+
       confidence: average(
         parts.flatMap((e) => (e?.confidence ? e?.confidence : []))
       ).toFixed(2),
@@ -200,13 +199,21 @@
       pronScore: average(
         parts.flatMap((e) => (e?.pronScore ? e?.pronScore : []))
       ).toFixed(0),
+      audioDuration: $audioControlDuration,
+      duration: undefined,
+      wordDurationSum: undefined,
     };
 
-    aggregateScore.duration = ((aggregateScore?.end - aggregateScore?.start) /10000000).toFixed(2);
-    aggregateScore.wordDurationSum = (sum(parts.flatMap((e) => e.words).map((w) => w.Duration)) /10000000).toFixed(2);
+    aggregateScore.audioDuration = $audioControlDuration;
+    aggregateScore.duration = (
+      (aggregateScore?.end - aggregateScore?.start) /
+      10000000
+    ).toFixed(2);
+    aggregateScore.wordDurationSum = (
+      sum(parts.flatMap((e) => e.words).map((w) => w.Duration)) / 10000000
+    ).toFixed(2);
 
-    aggregateScore.audioDuration = speechToTextOpus?.audioControlDuration;
-
+    aggregateScore = aggregateScore;
     console.log("aggregateScore", JSON.stringify(aggregateScore));
   }
 
@@ -356,12 +363,54 @@
         <div class="col">
           <button on:click={startRecognition}>Start</button>
           <button on:click={stopRecognition}>Stop</button>
-          <SpeechToTextOpus bind:this={speechToTextOpus} />
+          <SpeechToTextOpus bind:this={speechToTextOpus} on:audioControlDuration={(event) => {$audioControlDuration = event.detail.audioControlDuration; formatResult($recognitionResultsFinal);}}/>
         </div>
       </div>
       <div class="row">
         <div class="col">
           Result: {#key aggregateScore}{JSON.stringify(aggregateScore)}{/key}
+          <div class="card">
+            <div class="card-body">
+              <div id="resultDivContent">
+                <div class="score">
+                  Confidence:
+                  <span>{aggregateScore?.confidence}</span>
+                </div>
+                <div class="score">
+                  Accuracy:
+                  <span>{aggregateScore?.accuracyScore}</span>
+                </div>
+                <div class="score">
+                  Fluency:
+                  <span>{aggregateScore?.fluencyScore}</span>
+                </div>
+                <div class="score">
+                  Completeness:
+                  <span>{aggregateScore?.completenessScore}</span>
+                </div>
+
+                <div class="score">
+                  Pronunciation:
+                  <span>{aggregateScore?.pronScore}</span>
+                </div>
+
+                <div class="score">
+                  audioDuration:
+                  <span>{aggregateScore?.audioDuration}</span>
+                </div>
+
+                <div class="score">
+                  duration:
+                  <span>{aggregateScore?.duration}</span>
+                </div>
+
+                <div class="score">
+                  wordDurationSum:
+                  <span>{aggregateScore?.wordDurationSum}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="row">
@@ -369,7 +418,7 @@
           Parts:
           {#each parts as p, i}
             <div>
-              {i} - {#if p.confidence} {p?.confidence.toFixed(2)} {/if} - {p.displayText}
+              {i+1} - {#if p.confidence} {p?.confidence.toFixed(2)} {/if} - {p.displayText}
               <span style="display: none;">{JSON.stringify(p)}</span>
             </div>
           {/each}
