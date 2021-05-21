@@ -25,10 +25,10 @@
   let lastBlob;
   let lastAudio;
 
-  const time = 30;
+  const time = 90;
   let remainingTime = time;
   let countDownTimerObject;
-  let countDownTimerText = "0:30";
+  let countDownTimerText = "0:90";
 
   let recordingButtonState = "starting";
 
@@ -60,7 +60,7 @@
         recorder.start();
         // Set record to <audio> when recording will be finished
         recorder.addEventListener("dataavailable", (e) => {
-          console.log("dataavailable", e);
+          //   console.log("dataavailable", e);
 
           createDownloadLink(e.data);
         });
@@ -120,8 +120,8 @@
 
 <div>
   <div>remainingTime:{countDownTimerText}</div>
-  <div>lastRecording:{JSON.stringify(lastRecording)}</div>
-  {#if lastRecording}
+  <div>lastRecording:{JSON.stringify($lastRecording)}</div>
+  {#if $lastRecording}
     <audio controls="controls">
       <track kind="captions" />
       <source src={$lastRecording.url} type="audio/wav" />

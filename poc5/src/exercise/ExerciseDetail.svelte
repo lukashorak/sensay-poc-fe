@@ -1,5 +1,6 @@
 <script>
   import { onMount } from "svelte";
+  import { writable } from "svelte/store";
 
   import {
     userLogin,
@@ -7,7 +8,7 @@
     pin,
     pinFromUrl,
   } from "../utilities/DataStore";
-import SpeechToTextOpus from "./components/SpeechToTextOpus.svelte";
+  import SpeechToTextOpus from "./components/SpeechToTextOpus.svelte";
 
   export let loginDetail;
   export let lessonId;
@@ -21,7 +22,15 @@ import SpeechToTextOpus from "./components/SpeechToTextOpus.svelte";
   let ttsButtonState;
   let errorMsg;
 
+  let parts = [];
+  let aggregateScore;
+
   let recognitionResults = [];
+  let recognitionResultsFinal = writable([]);
+
+  const unsubscribe = recognitionResultsFinal.subscribe((value) => {
+    formatResult(value);
+  });
 
   let recognizer;
 
@@ -101,7 +110,8 @@ import SpeechToTextOpus from "./components/SpeechToTextOpus.svelte";
   }
 
   function startRecognition() {
-    recognitionResults.push('START');
+    $recognitionResultsFinal = [];
+    recognitionResults.push("START");
     recognitionResults = recognitionResults;
     fromMic();
     speechToTextOpus.startRecording();
@@ -109,10 +119,83 @@ import SpeechToTextOpus from "./components/SpeechToTextOpus.svelte";
 
   function stopRecognition(fromTimer = false) {
     ttsButtonState = "stop";
-    recognitionResults.push('STOP');
+    recognitionResults.push("STOP");
     recognitionResults = recognitionResults;
-    recognizer.stopContinuousRecognitionAsync();
     speechToTextOpus.stopRecording();
+    //console.log("finalResult", JSON.stringify(recognitionResults));
+    recognizer.stopContinuousRecognitionAsync();
+
+    // console.log(
+    //   "recognitionResultsFinal",
+    //   JSON.stringify($recognitionResultsFinal)
+    // );
+  }
+
+  function formatResult(r) {
+    const average = (arr) => arr.reduce((p, c) => p + c, 0) / arr.length;
+
+    parts = r.flatMap((part) => {
+      if (part?.NBest.length > 0) {
+        if (part.NBest[0].PronunciationAssessment) {
+          return {
+            recognitionStatus: part.RecognitionStatus,
+            offset: part.Offset,
+            duration: part.Duration,
+            displayText: part.DisplayText,
+            confidence: part.NBest[0].Confidence,
+            accuracyScore: part.NBest[0].PronunciationAssessment.AccuracyScore,
+            fluencyScore: part.NBest[0].PronunciationAssessment.FluencyScore,
+            completenessScore:
+              part.NBest[0].PronunciationAssessment.CompletenessScore,
+            pronScore: part.NBest[0].PronunciationAssessment.PronScore,
+            words: part.NBest[0].Words,
+            wordCount: part.NBest[0].Words.length,
+          };
+        } else {
+          return {
+            recognitionStatus: part.RecognitionStatus,
+            offset: part.Offset,
+            duration: part.Duration,
+            displayText: part.DisplayText,
+            confidence: part.NBest[0].Confidence,
+            words: part.NBest[0].Words,
+            wordCount: part.NBest[0].Words?.length
+              ? part.NBest[0].Words?.length
+              : 0,
+          };
+        }
+      } else {
+        let x = {
+          recognitionStatus: part.RecognitionStatus,
+          offset: part.Offset,
+          duration: part.Duration,
+          displayText: part.DisplayText,
+        };
+        return [];
+      }
+    });
+
+    // console.log("parts", JSON.stringify(parts));
+
+    aggregateScore = {
+      confidence: average(
+        parts.flatMap((e) => (e?.confidence ? e?.confidence : []))
+      ).toFixed(2),
+      accuracyScore: average(
+        parts.flatMap((e) => (e?.accuracyScore ? e?.accuracyScore : []))
+      ).toFixed(0),
+      fluencyScore: average(
+        parts.flatMap((e) => (e?.fluencyScore ? e?.fluencyScore : []))
+      ).toFixed(0),
+      completenessScore: average(
+        parts.flatMap((e) => (e?.completenessScore ? e?.completenessScore : []))
+      ).toFixed(0),
+      pronScore: average(
+        parts.flatMap((e) => (e?.pronScore ? e?.pronScore : []))
+      ).toFixed(0),
+    };
+
+    console.log("aggregateScore", JSON.stringify(aggregateScore));
   }
 
   function fromMic() {
@@ -156,19 +239,18 @@ import SpeechToTextOpus from "./components/SpeechToTextOpus.svelte";
 
     recognizer.recognizing = (s, e) => {
       console.log(`RECOGNIZING: Text=${e.result.text}`);
-      recognitionResults.push({ recognizing: e?.result });
 
-      var pronunciationAssessmentResult =
-        SpeechSDK.PronunciationAssessmentResult.fromResult(e);
-      console.log(
-        `pronunciationAssessmentResult: ${JSON.stringify(
-          pronunciationAssessmentResult
-        )}`
-      );
-      recognitionResults.push({
-        pronunciationAssessmentResult: pronunciationAssessmentResult,
-      });
-      recognitionResults = recognitionResults;
+      // var pronunciationAssessmentResult =
+      //   SpeechSDK.PronunciationAssessmentResult.fromResult(e);
+      // console.log(
+      //   `pronunciationAssessmentResult: ${JSON.stringify(
+      //     pronunciationAssessmentResult
+      //   )}`
+      // );
+      // recognitionResults.push({
+      //   pronunciationAssessmentResult: pronunciationAssessmentResult,
+      // });
+      // recognitionResults = recognitionResults;
     };
 
     // recognizer.speechStartDetected = (s, e) => {
@@ -186,17 +268,20 @@ import SpeechToTextOpus from "./components/SpeechToTextOpus.svelte";
 
         var pronunciationAssessmentResult = JSON.parse(e.result.json);
         //SpeechSDK.PronunciationAssessmentResult.fromResult(e);
-        console.log(
-          `pronunciationAssessmentResult: ${JSON.stringify(
-            pronunciationAssessmentResult
-          )}`
-        );
+        // console.log(
+        //   `pronunciationAssessmentResult: ${JSON.stringify(
+        //     pronunciationAssessmentResult
+        //   )}`
+        // );
         recognitionResults.push({
           pronunciationAssessmentResult: pronunciationAssessmentResult,
         });
         recognitionResults = recognitionResults;
 
-        console.log('recognitionResults', JSON.stringify(recognitionResults));
+        $recognitionResultsFinal.push(pronunciationAssessmentResult);
+        $recognitionResultsFinal = $recognitionResultsFinal;
+
+        // console.log("recognitionResults", JSON.stringify(recognitionResults));
       } else if (e.result.reason == SpeechSDK.ResultReason.NoMatch) {
         console.log("NOMATCH: Speech could not be recognized.");
       }
@@ -259,13 +344,23 @@ import SpeechToTextOpus from "./components/SpeechToTextOpus.svelte";
         <div class="col">
           <button on:click={startRecognition}>Start</button>
           <button on:click={stopRecognition}>Stop</button>
-          <SpeechToTextOpus bind:this={speechToTextOpus} on:recordingStop={() => stopRecognition(true)}></SpeechToTextOpus>
+          <SpeechToTextOpus bind:this={speechToTextOpus} />
         </div>
       </div>
       <div class="row">
         <div class="col">
-
-          Result: {#key recognitionResults}{JSON.stringify(recognitionResults)}{/key}
+          Result: {#key aggregateScore}{JSON.stringify(aggregateScore)}{/key}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          Parts:
+          {#each parts as p, i}
+            <div>
+              {i} - {#if p.confidence} {p?.confidence.toFixed(2)} {/if} - {p.displayText}
+              <span style="display: none;">{JSON.stringify(p)}</span>
+            </div>
+          {/each}
         </div>
       </div>
     {/if}
