@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" class="notranslate" translate="no">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+	<meta name="google" content="notranslate" />
+
+    <title>Sensay - Students</title>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- <script
+      src="https://cdn.lr-ingest.io/LogRocket.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      window.LogRocket && window.LogRocket.init("sensay/studentsite");
+    </script> -->
+
+    <script
+      defer
+      onload="check();"
+      src="https://cdn.jsdelivr.net/npm/ua-parser-js@0/dist/ua-parser.min.js"
+    ></script>
+
+    <script defer>
+      console.log("load defer");
+
+      function check() {
+        let pr = new UAParser();
+        parser = pr.getResult();
+        console.log(parser);
+        checkCompatibility(parser);
+      }
+
+      function checkCompatibility(parser) {
+        if (
+          parser.browser.name === "Line" ||
+          parser.browser.name === "Facebook" ||
+          parser.browser.name === "Firefox" || (parser.os.name === 'iOS' && parser.browser.name != "Safari")
+        ) {
+          console.log("hide app");
+          document.getElementById("not-compatible").style.display = "";
+          document.getElementById("app").style.display = "none";
+        } else {
+          console.log("clear");
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("app").style.display = "";
+        }
+      }
+    </script>
+    <script>
+      function clear() {
+        check();
+        // console.log('clear');
+        document.getElementById("loading").style.display = "none";
+        // document.getElementById("app").style.display = '';
+      }
+    </script>
+
+    <link
+      rel="stylesheet"
+      href="./assets/css/Highlight-Clean.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="./assets/css/Highlight-Phone.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="./assets/css/Login-Form-Clean.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="./assets/css/Navigation-Clean.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="./assets/css/styles.css"
+      media="print"
+      onload="this.media='all'"
+    />
+
+    <link
+      rel="stylesheet"
+      href="assets/bootstrap/css/bootstrap.min.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.12.0/css/all.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="./assets/fonts/fontawesome5-overrides.min.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css"
+      media="print"
+      onload="this.media='all'"
+    />
+
+    <link
+      rel="stylesheet"
+      href="./global.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="./build/bundle.css"
+      media="print"
+      onload="this.media='all'"
+    />
+  </head>
+
+  <body onload="clear()">
+    <div style="display: grid; place-items: center" id="loading">
+      <div>Loading ...</div>
+    </div>
+
+    <div style="display: none" id="not-compatible">
+      Due to technical limitations of iOS, Sensay only works directly in
+		Safari. If you open as link from Line or FB please explicitly open it. <a
+		  href="https://www.oksensay.com/337-2/">Need help?</a
+		>
+	  </div>
+    <div style="display: none" id="app"></div>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
+      defer
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.bundle.min.js"
+      defer
+    ></script>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.js"
+      defer
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@latest/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js"
+      defer
+    ></script>
+
+    <script src="https://unpkg.com/wavesurfer.js"></script>
+    <script src="https://unpkg.com/wavesurfer.js/dist/plugin/wavesurfer.timeline.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/OpusMediaRecorder.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/encoderWorker.umd.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@latest/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@carbon/charts/styles.min.css"
+    />
+
+    <script defer src="./build/bundle.js"></script>
+  </body>
+</html>
