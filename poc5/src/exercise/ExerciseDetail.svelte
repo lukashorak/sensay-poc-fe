@@ -29,7 +29,7 @@
   let recognitionResultsFinal = writable([]);
 
   let speechToTextOpus = undefined;
-  
+
   let audioControlDuration = writable(undefined);
   let recognizer;
 
@@ -361,9 +361,25 @@
           {ttsButtonState} - {ttsToken}
         </div>
         <div class="col">
-          <button on:click={startRecognition}>Start</button>
-          <button on:click={stopRecognition}>Stop</button>
-          <SpeechToTextOpus bind:this={speechToTextOpus} on:audioControlDuration={(event) => {$audioControlDuration = event.detail.audioControlDuration; formatResult($recognitionResultsFinal);}}/>
+          {#if ttsButtonState === "starting"}...
+          {:else if ttsButtonState === "error"}STT Error
+          {:else if ttsButtonState === "ready" || ttsButtonState === "stop"}
+            <button class="btn btn-primary" on:click={startRecognition}
+              >Start</button
+            >
+          {:else if ttsButtonState === "recording"}
+            <button on:click={stopRecognition}>Stop</button>
+          {:else}
+            xx
+          {/if}
+
+          <SpeechToTextOpus
+            bind:this={speechToTextOpus}
+            on:audioControlDuration={(event) => {
+              $audioControlDuration = event.detail.audioControlDuration;
+              formatResult($recognitionResultsFinal);
+            }}
+          />
         </div>
       </div>
       <div class="row">
@@ -418,7 +434,7 @@
           Parts:
           {#each parts as p, i}
             <div>
-              {i+1} - {#if p.confidence} {p?.confidence.toFixed(2)} {/if} - {p.displayText}
+              {i + 1} - {#if p.confidence} {p?.confidence.toFixed(2)} {/if} - {p.displayText}
               <span style="display: none;">{JSON.stringify(p)}</span>
             </div>
           {/each}
